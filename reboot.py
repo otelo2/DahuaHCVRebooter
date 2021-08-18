@@ -5,7 +5,6 @@ import threading
 import time
 import sys
 from dahua_rpc import DahuaRpc, RebootDone
-from Ping import ping
 
 host = "192.168.100.208"
 username = "admin"
@@ -82,7 +81,7 @@ def main():
         firstReboot()
 
         if DOS == 'y':
-            DOS_reboot(waiting=82)
+            DOS_reboot(waiting=85)
 
     print("Goodbye")
 
