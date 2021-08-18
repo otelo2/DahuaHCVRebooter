@@ -24,11 +24,10 @@ def firstReboot():
     except RebootDone:
         print("DVR likely reboted!")
 
-def DOS_reboot():
+def DOS_reboot(waiting=85):
     #Note: This has an error margin of about 9 to 2 seconds.
     #Wait for the DVR to come back online
     timeStart = time.time()
-    waiting = 85
     print(f"Waiting {waiting} seconds for the DVR to reboot...")
     #Start the waiting animation
     done = False
@@ -83,7 +82,7 @@ def main():
         firstReboot()
 
         if DOS == 'y':
-            DOS_reboot()
+            DOS_reboot(waiting=82)
 
     print("Goodbye")
 
