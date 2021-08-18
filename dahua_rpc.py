@@ -37,7 +37,7 @@ class DahuaRpc(object):
         self.session_id = None
         self.id = 0
 
-    def request(self, method, params=None, object_id=None, extra=None, url=None):
+    def request(self, method, params=None, object_id=None, extra=None, url=None, timeout=None):
         """Make a RPC request."""
         self.id += 1
         data = {'method': method, 'id': self.id}
@@ -51,7 +51,7 @@ class DahuaRpc(object):
             data['session'] = self.session_id
         if not url:
             url = "http://{}/RPC2".format(self.host)
-        r = self.s.post(url, json=data)
+        r = self.s.post(url, json=data, timeout=timeout)
         return r.json()
 
     def login(self):
@@ -115,7 +115,10 @@ class DahuaRpc(object):
 
         # Reboot
         method = "magicBox.reboot"
-        r = self.request(method=method, params=params, object_id=object_id)
+        try:
+            r = self.request(method=method, params=params, object_id=object_id, timeout=0.1)
+        except requests.exceptions.ReadTimeout:
+            raise RebootDone()
 
         if r['result'] is False:
             raise RequestError(str(r))
@@ -200,4 +203,8 @@ class LoginError(Exception):
 
 
 class RequestError(Exception):
+    pass
+
+
+class RebootDone(Exception):
     pass
