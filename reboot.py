@@ -17,60 +17,42 @@ def firstReboot():
     print(f"Attempting to log into {host} with {username}:{password}")
     dahua.login()
     print(f"Correctly logged in at {dahua.current_time()}")
-    selection = input("Do you really want to reboot the device? (y/n) ").lower()
-    if selection == 'y':
-        print("Rebooting...")
-        timeStart = time.time()
-        try:
-            dahua.reboot()
-        except RebootDone:
-            print("DVR likely reboted!")
-        
-        #Check if the DVR has come online
-        DOS = input("Do you want to keep rebooting the device? (y/n) ").lower()
-        if DOS == "y": 
-            #Note: This has an error margin of about 9 to 2 seconds.
-            waiting = 85
-            print(f"Waiting {waiting} seconds for the DVR to reboot...")
-            #Start the waiting animation
-            done = False
-            t = threading.Thread(target=waitAnimation)
-            t.daemon = True
-            t.start()
-            time.sleep(waiting)
-            done = True
-            timeEnd = time.time()
-            print(f"DVR is (probably) back online after {timeEnd-timeStart} seconds")
-            #Login again and try to reboot
-            DOS_reboot()
-        else:
-            print("Exiting reboot sequence")
+
+    print("Rebooting...")
+    try:
+        dahua.reboot()
+    except RebootDone:
+        print("DVR likely reboted!")
 
 def DOS_reboot():
+    #Note: This has an error margin of about 9 to 2 seconds.
+    #Wait for the DVR to come back online
+    timeStart = time.time()
+    waiting = 85
+    print(f"Waiting {waiting} seconds for the DVR to reboot...")
+    #Start the waiting animation
+    done = False
+    t = threading.Thread(target=waitAnimation)
+    t.daemon = True
+    t.start()
+    time.sleep(waiting)
+    done = True
+    timeEnd = time.time()
+    #End the waiting amination
+    print(f"DVR is (probably) back online after waiting {timeEnd-timeStart} seconds")
+    print("Remember to ctrl + C to stop rebooting :)")
+    
+    #Login to the DVR
     dahua = DahuaRpc(host, username, password)
     print(f"Attempting to log into {host} with {username}:{password}")
     dahua.login()
     print(f"Correctly logged in at {dahua.current_time()}")
 
     print("Rebooting...")
-    timeStart = time.time()
     try:
         dahua.reboot()
     except RebootDone:
         print("DVR likely reboted!")
-        #Note: This has an error margin of about 9 to 2 seconds.
-        waiting = 85
-        print(f"Waiting {waiting} seconds for the DVR to reboot...")
-        #Start the waiting animation
-        done = False
-        t = threading.Thread(target=waitAnimation)
-        t.daemon = True
-        t.start()
-        time.sleep(waiting)
-        done = True
-        timeEnd = time.time()
-        print(f"DVR is back online after {timeEnd-timeStart} seconds")
-        print("Remember to ctrl + C to stop rebooting :)")
         DOS_reboot()
 
 def waitAnimation():
@@ -94,7 +76,15 @@ def waitAnimation():
 
 def main():
     done = False
-    firstReboot()
+    selection = input("Do you really want to reboot the device? (y/n) ").lower()
+    
+    if selection == 'y':
+        DOS = input("Do you want to keep rebooting the device? (y/n) ").lower()
+        firstReboot()
+
+        if DOS == 'y':
+            DOS_reboot()
+
     print("Goodbye")
 
 if __name__ == "__main__":
