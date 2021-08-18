@@ -2,7 +2,7 @@
 #https://gist.github.com/gxfxyz/48072a72be3a169bc43549e676713201#file-dahua_rpc-py
 from dahua_rpc import DahuaRpc
 
-host = "192.168.100.196"
+host = "192.168.100.208"
 username = "admin"
 password = "admin"
 
