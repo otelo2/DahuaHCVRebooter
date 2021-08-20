@@ -51,7 +51,7 @@ def DOS_reboot(waiting=85):
         dahua.reboot()
     except RebootDone:
         print("DVR likely reboted!")
-        DOS_reboot()
+        DOS_reboot(waiting=88)
 
 def waitAnimation():
     #here is the animation
