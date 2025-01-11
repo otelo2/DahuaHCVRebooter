@@ -51,7 +51,7 @@ class DahuaRpc(object):
             data['session'] = self.session_id
         if not url:
             url = "http://{}/RPC2".format(self.host)
-        r = self.s.post(url, json=data, timeout=timeout)
+        r = self.s.post(url, json=data, timeout=1)
         return r.json()
 
     def login(self):

