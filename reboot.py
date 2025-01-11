@@ -74,14 +74,12 @@ def waitAnimation():
 
 def main():
     done = False
-    selection = input("Do you really want to reboot the device? (y/n) ").lower()
     
-    if selection == 'y':
-        DOS = input("Do you want to keep rebooting the device? (y/n) ").lower()
-        firstReboot()
+    DOS = input("Do you want to keep rebooting the device? (y/n) ").lower()
+    firstReboot()
 
-        if DOS == 'y':
-            DOS_reboot(waiting=85)
+    if DOS == 'y':
+        DOS_reboot(waiting=85)
 
     print("Goodbye")
 
